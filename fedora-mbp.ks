@@ -10,6 +10,8 @@ eula --agreed
 ### Install kernel from hosted rpm repo
 %packages
 
+langpacks-*
+
 git
 gcc
 gcc-c++
