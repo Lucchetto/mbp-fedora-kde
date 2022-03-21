@@ -7,8 +7,6 @@ FEDORA_VERSION=35
 FEDORA_KICKSTARTS_GIT_URL=https://pagure.io/fedora-kickstarts.git
 FEDORA_KICKSTARTS_BRANCH_NAME=f35
 FEDORA_KICKSTARTS_COMMIT_HASH=410251a8a5854d978e22ca8fc902cc8763a72038        # https://pagure.io/fedora-kickstarts/commits/f35
-LIVECD_TOOLS_GIT_URL=https://github.com/mikeeq/livecd-tools
-LIVECD_TOOLS_GIT_BRANCH_NAME=feature/fix-f35-build
 LIVECD_CACHE_PATH=/var/cache/live
 ARTIFACT_NAME="livecd-mbp-${FEDORA_KICKSTARTS_BRANCH_NAME}-$(date +'%Y%m%d').zip"
 
@@ -32,23 +30,10 @@ dnf install -y \
 ### Install livecd-tools fix
 [ -x "$(command -v python)" ] || ln -s /usr/bin/python3 /usr/bin/python
 
-git clone --single-branch --branch ${LIVECD_TOOLS_GIT_BRANCH_NAME} ${LIVECD_TOOLS_GIT_URL} /tmp/livecd-tools
-cd /tmp/livecd-tools
-make install
-cd "${CURRENT_PWD}"
-
-### Copy efibootmgr fix for anaconda
-mkdir -p /tmp/kickstart_files/
-cp -rfv files/* /tmp/kickstart_files/
-
 ### Clone Fedora kickstarts repo
 git clone --single-branch --branch ${FEDORA_KICKSTARTS_BRANCH_NAME} ${FEDORA_KICKSTARTS_GIT_URL} /tmp/fedora-kickstarts
 cd /tmp/fedora-kickstarts
 git checkout $FEDORA_KICKSTARTS_COMMIT_HASH
-
-### Copy fedora-mbp kickstart file
-cp -rfv "${CURRENT_PWD}"/fedora-mbp.ks ./
-mkdir -p ${LIVECD_CACHE_PATH}
 
 ### Workaround - travis_wait
 while true
@@ -59,7 +44,7 @@ done &
 bgPID=$!
 
 ### Generate LiveCD iso
-livecd-creator --verbose --releasever=${FEDORA_VERSION} --config=fedora-mbp.ks --cache=${LIVECD_CACHE_PATH}
+livecd-creator --verbose --releasever=${FEDORA_VERSION} --config=/tmp/fedora-kickstarts/fedora-live-kde.ks --cache=${LIVECD_CACHE_PATH}
 livecd_exitcode=$?
 
 ### Move iso artifact to repo dir
