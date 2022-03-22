@@ -27,7 +27,8 @@ dnf install -y \
   curl \
   zip \
   make \
-  livecd-tools
+  livecd-tools \
+  glibc-all-langpacks
 
 ### Install livecd-tools fix
 [ -x "$(command -v python)" ] || ln -s /usr/bin/python3 /usr/bin/python
